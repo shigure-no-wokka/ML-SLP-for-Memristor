@@ -74,8 +74,8 @@ def text_save(filename, data):  # filename为写入CSV文件的路径，data为�
     file.close()
     print("保存文件成功")
 
-f = open('100权重GD.txt')
+f = open('电导-权重态数据文件/100权重GD.txt')
 L = []
 for each in f:
     L.append(each.replace('\n', ','))
-text_save('100权重GD.txt', L)
+text_save('电导-权重态数据文件/100权重GD.txt', L)
