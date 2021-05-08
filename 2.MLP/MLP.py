@@ -228,10 +228,11 @@ def softmax(x):
     exp = np.exp(x-x.max())
     return exp/exp.sum()
 
-dimensions = [28*28, 10] # 输入层 28*28， 输出层为 10
+dimensions = [28*28, 20*20,10] # 输入层 28*28, 隐藏层 20*20, 输出层 10
 activation = [tanh, softmax]
 distribution = [
     {'b':[0,0]},
+    {'b':[0,0], 'w':[-1, +1]},
     {'b':[0,0], 'w':[-1, +1]},
 ]
 
