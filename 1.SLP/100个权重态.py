@@ -467,8 +467,9 @@ test_accu_list = []
 # 进度条
 # from tqdm import tqdm_notebook
 
+save_path = Path('./TEST/返修/')
 learn_rate = 0.01
-epoch_num = 10
+epoch_num = 600
 for epoch in range(epoch_num):
     current_epoch += 1
     print('Now running epoch %d/%d' % (current_epoch, epoch_num))
@@ -479,22 +480,24 @@ for epoch in range(epoch_num):
         parameters = combine_parameters(parameters, grad_tmp, learn_rate)
     if current_epoch == 10:
         dist_of_num = count_num(parameters)
-        text_save('./TEST/100/epoch=%d' % current_epoch, dist_of_num)
+        text_save(save_path /f'epoch={current_epoch}.txt', dist_of_num)
 
-    train_loss_list.append(train_loss(parameters))
+    # train_loss_list.append(train_loss(parameters))
     train_accu_list.append(train_accuracy(parameters))
-    test_loss_list.append(test_loss(parameters))
-    test_accu_list.append(test_accuracy(parameters))
+    # test_loss_list.append(test_loss(parameters))
+    # test_accu_list.append(test_accuracy(parameters))
+    print(train_accu_list[-1])
+
 
 lower = 0
-plt.plot(test_loss_list[lower:], color='black', label='test loss', marker='o')
-plt.plot(train_loss_list[lower:], color='red', label='train loss', marker='>')
-plt.show()
-plt.plot(test_accu_list[lower:], color='black', label='test accuracy', marker='o')
+# plt.plot(test_loss_list[lower:], color='black', label='test loss', marker='o')
+# plt.plot(train_loss_list[lower:], color='red', label='train loss', marker='>')
+# plt.show()
+# plt.plot(test_accu_list[lower:], color='black', label='test accuracy', marker='o')
 plt.plot(train_accu_list[lower:], color='red', label='train accuracy', marker='>')
 plt.show()
 
-train_filename = './TEST/100/train_accu epoch=%d batch=%d learn_rate=%0.2e.txt' % (epoch_num, batch_size, learn_rate)
-test_filename = './TEST/100/test_accu epoch=%d batch=%d learn_rate=%0.2e.txt' % (epoch_num, batch_size, learn_rate)
+train_filename = save_path / f'train_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
+# test_filename = './TEST/100/test_accu epoch=%d batch=%d learn_rate=%0.2e.txt' % (epoch_num, batch_size, learn_rate)
 text_save(train_filename, train_accu_list)
-text_save(test_filename, test_accu_list)
+# text_save(test_filename, test_accu_list)
