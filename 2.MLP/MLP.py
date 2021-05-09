@@ -228,8 +228,8 @@ def softmax(x):
     exp = np.exp(x-x.max())
     return exp/exp.sum()
 
-dimensions = [28*28, 20*20,10] # 输入层 28*28, 隐藏层 20*20, 输出层 10
-activation = [tanh, softmax]
+dimensions = [28*28, 20*20,10] # 输入层 784, 隐藏层 400, 输出层 10
+activation = [tanh, tanh, softmax]
 distribution = [
     {'b':[0,0]},
     {'b':[0,0], 'w':[-1, +1]},
@@ -262,9 +262,11 @@ def init_parameters():
 def predict(img, parameters):
     l0_in = img + parameters[0]['b']
     l0_out = activation[0](l0_in)
-    l1_in = np.dot(l0_out, parameters[1]['w']+parameters[1]['b'])
+    l1_in = np.dot(l0_out, parameters[1]['w'])+parameters[1]['b']
     l1_out = activation[1](l1_in)
-    return l1_out
+    l2_in = np.dot(l1_out, parameters[2]['w'])+parameters[2]['b']
+    l2_out = activation[2](l2_in)
+    return l2_out
 # print(predict(np.random.rand(784), parameters).argmax())
 dataset_path = Path('./MNIST')
 train_img_path = dataset_path/'train-images-idx3-ubyte'
@@ -335,17 +337,25 @@ differential = {softmax:d_softmax, tanh:d_tanh}
 def grad_parameters(img, lab, parameters):
     l0_in = img + parameters[0]['b']
     l0_out = activation[0](l0_in)
-    l1_in = np.dot(l0_out, parameters[1]['w']+parameters[1]['b'])
+    l1_in = np.dot(l0_out, parameters[1]['w']) + parameters[1]['b']
     l1_out = activation[1](l1_in)
+    l2_in = np.dot(l1_out, parameters[2]['w']) + parameters[2]['b']
+    l2_out = activation[2](l2_in)
 
-    diff = onehot[lab] - l1_out
+    diff = onehot[lab] - l2_out
     act1 = np.dot(differential[activation[1]](l1_in), diff)
+    act2 = np.dot(differential[activation[2]](l2_in), diff)
 
-    grad_b1 = -2 * act1
-    grad_w1 = -2 * np.outer(l0_out, act1)
-    grad_b0 = -2 * differential[activation[0]](l0_in) * np.dot(parameters[1]['w'] ,act1)
+    act3 = np.outer(l0_out, differential[activation[2]](l2_in))
+    act4 = np.dot(parameters[2]['w'], act3)
 
-    return {'w1': grad_w1, 'b1':grad_b1, 'b0':grad_b0}
+    grad_b2 = -2 * act2
+    grad_w2 = -2 * np.outer(l1_out, act2)
+    grad_b1 = -2 * differential[activation[1]](l1_in) * np.dot(parameters[2]['w'], act2)
+    grad_w1 = -2 * np.outer(act4, act2)
+    grad_b0 = -2 * differential[activation[0]](l0_in) * np.dot(parameters[1]['w'], differential[activation[1]](l1_in)) * np.dot(parameters[2]['w'], act2)
+
+    return {'w2': grad_w2, 'b2': grad_b2, 'w1': grad_w1, 'b1':grad_b1, 'b0':grad_b0}
 
 
 def count_num(parameters):
@@ -440,6 +450,9 @@ def combine_parameters(parameters, grad, learn_rate):
     parameter_tmp[1]['b'] -= learn_rate * grad['b1']
     parameter_tmp[1]['w'] -= learn_rate * grad['w1']
     parameter_tmp[1]['w'] = each_change(parameter_tmp[1]['w'], grad['w1'])
+    parameter_tmp[2]['b'] -= learn_rate * grad['b2']
+    parameter_tmp[2]['w'] -= learn_rate * grad['w2']
+    parameter_tmp[2]['w'] = each_change(parameter_tmp[2]['w'], grad['w1'])
     return parameter_tmp
 
 
@@ -459,10 +472,10 @@ def text_save(filename, data):  # filename为写入CSV文件的路径，data为�
 
 parameters = init_parameters()
 current_epoch = 0
-train_loss_list = []
-test_loss_list = []
+# train_loss_list = []
+# test_loss_list = []
 train_accu_list = []
-test_accu_list = []
+# test_accu_list = []
 # print(valid_accuracy(parameters))
 
 # 进度条
@@ -482,20 +495,20 @@ for epoch in range(epoch_num):
         dist_of_num = count_num(parameters)
         text_save('./TEST/100/epoch=%d' % current_epoch, dist_of_num)
 
-    train_loss_list.append(train_loss(parameters))
+    # train_loss_list.append(train_loss(parameters))
     train_accu_list.append(train_accuracy(parameters))
-    test_loss_list.append(test_loss(parameters))
-    test_accu_list.append(test_accuracy(parameters))
+    # test_loss_list.append(test_loss(parameters))
+    # test_accu_list.append(test_accuracy(parameters))
 
 lower = 0
-plt.plot(test_loss_list[lower:], color='black', label='test loss', marker='o')
-plt.plot(train_loss_list[lower:], color='red', label='train loss', marker='>')
-plt.show()
-plt.plot(test_accu_list[lower:], color='black', label='test accuracy', marker='o')
+# plt.plot(test_loss_list[lower:], color='black', label='test loss', marker='o')
+# plt.plot(train_loss_list[lower:], color='red', label='train loss', marker='>')
+# plt.show()
+# plt.plot(test_accu_list[lower:], color='black', label='test accuracy', marker='o')
 plt.plot(train_accu_list[lower:], color='red', label='train accuracy', marker='>')
 plt.show()
 
 train_filename = './TEST/100/train_accu epoch=%d batch=%d learn_rate=%0.2e.txt' % (epoch_num, batch_size, learn_rate)
 test_filename = './TEST/100/test_accu epoch=%d batch=%d learn_rate=%0.2e.txt' % (epoch_num, batch_size, learn_rate)
 text_save(train_filename, train_accu_list)
-text_save(test_filename, test_accu_list)
+# text_save(test_filename, test_accu_list)
