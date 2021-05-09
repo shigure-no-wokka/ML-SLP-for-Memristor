@@ -343,17 +343,15 @@ def grad_parameters(img, lab, parameters):
     l2_out = activation[2](l2_in)
 
     diff = onehot[lab] - l2_out
-    act1 = np.dot(differential[activation[1]](l1_in), diff)
-    act2 = np.dot(differential[activation[2]](l2_in), diff)
 
-    act3 = np.outer(l0_out, differential[activation[2]](l2_in))
-    act4 = np.dot(parameters[2]['w'], act3)
+    act1 = np.dot(differential[activation[2]](l2_in), diff)
+    act2 = differential[activation[1]](l1_in) * parameters[2]['w'] * act1
 
-    grad_b2 = -2 * act2
-    grad_w2 = -2 * np.outer(l1_out, act2)
-    grad_b1 = -2 * differential[activation[1]](l1_in) * np.dot(parameters[2]['w'], act2)
-    grad_w1 = -2 * np.outer(act4, act2)
-    grad_b0 = -2 * differential[activation[0]](l0_in) * np.dot(parameters[1]['w'], differential[activation[1]](l1_in)) * np.dot(parameters[2]['w'], act2)
+    grad_b2 = -2 * act1
+    grad_w2 = -2 * np.outer(l1_out, act1)
+    grad_b1 = -2 * differential[activation[1]](l1_in) * parameters[2]['w'] * act1
+    grad_w1 = -2 * np.outer(l0_out, act2)
+    grad_b0 = -2 * differential[activation[0]](l0_in) * parameters[1]['w'] * differential[activation[1]](l1_in) * parameters[2]['w'] * act1
 
     return {'w2': grad_w2, 'b2': grad_b2, 'w1': grad_w1, 'b1':grad_b1, 'b0':grad_b0}
 
