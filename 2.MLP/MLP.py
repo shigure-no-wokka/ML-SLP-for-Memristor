@@ -3,8 +3,7 @@ from pathlib import Path
 import struct
 import matplotlib.pyplot as plt
 import copy
-import math
-import datetime
+
 
 GP = np.array([0.99,
 3.7,
@@ -228,7 +227,7 @@ def softmax(x):
     exp = np.exp(x-x.max())
     return exp/exp.sum()
 
-dimensions = [28*28, 20*20,10] # 输入层 784, 隐藏层 400, 输出层 10
+dimensions = [784, 10,10] # 输入层 784, 隐藏层 400, 输出层 10
 activation = [tanh, tanh, softmax]
 distribution = [
     {'b':[0,0]},
@@ -443,15 +442,17 @@ def each_change(matrix_old, gradw1):
     return matrix_new
 
 
-def combine_parameters(parameters, grad, learn_rate):
+def combine_parameters(parameters, grad, learn_rate, current_epoch):
     parameter_tmp = copy.deepcopy(parameters)
     parameter_tmp[0]['b'] -= learn_rate * grad['b0']
     parameter_tmp[1]['b'] -= learn_rate * grad['b1']
     parameter_tmp[1]['w'] -= learn_rate * grad['w1']
-    # parameter_tmp[1]['w'] = each_change(parameter_tmp[1]['w'], grad['w1'])
+
     parameter_tmp[2]['b'] -= learn_rate * grad['b2']
     parameter_tmp[2]['w'] -= learn_rate * grad['w2']
-    # parameter_tmp[2]['w'] = each_change(parameter_tmp[2]['w'], grad['w1'])
+
+    parameter_tmp[1]['w'] = each_change(parameter_tmp[1]['w'], grad['w1'])
+    parameter_tmp[2]['w'] = each_change(parameter_tmp[2]['w'], grad['w1'])
     return parameter_tmp
 
 
@@ -482,34 +483,35 @@ test_accu_list = []
 
 save_path = Path('./Recognition data/TEST/')
 learn_rate = 0.01
-epoch_num = 10
+epoch_num = 200
 for epoch in range(epoch_num):
     current_epoch += 1
     print('Now running epoch %d/%d' % (current_epoch, epoch_num))
     for i in range(int(train_num / batch_size)):
-        if i % 100 == 99:
-            print('running batch {}/{}'.format(i + 1, train_num / batch_size))
+        # if i % 100 == 99:
+        #     print('running batch {}/{}'.format(i + 1, train_num / batch_size))
+        print(f'epoch {current_epoch} running batch {i+1}/{int(train_num / batch_size)}')
         grad_tmp = train_batch(i, parameters)
-        parameters = combine_parameters(parameters, grad_tmp, learn_rate)
-    if current_epoch == 10:
+        parameters = combine_parameters(parameters, grad_tmp, learn_rate, current_epoch)
+    if current_epoch % 10 == 0:
         dist_of_num = count_num(parameters)
-        text_save(save_path/f'each_num_accu epoch={current_epoch}', dist_of_num)
+        text_save(f'./Recognition data/TEST/each_num_accu epoch={current_epoch}.txt', dist_of_num)
 
-    train_loss_list.append(train_loss(parameters))
+    # train_loss_list.append(train_loss(parameters))
     train_accu_list.append(train_accuracy(parameters))
-    test_loss_list.append(test_loss(parameters))
-    test_accu_list.append(test_accuracy(parameters))
+    # test_loss_list.append(test_loss(parameters))
+    # test_accu_list.append(test_accuracy(parameters))
     print(train_accu_list[-1])
 
 lower = 0
-plt.plot(test_loss_list[lower:], color='black', label='test loss', marker='o')
-plt.plot(train_loss_list[lower:], color='red', label='train loss', marker='>')
-plt.show()
-plt.plot(test_accu_list[lower:], color='black', label='test accuracy', marker='o')
+# plt.plot(test_loss_list[lower:], color='black', label='test loss', marker='o')
+# plt.plot(train_loss_list[lower:], color='red', label='train loss', marker='>')
+# plt.show()
+# plt.plot(test_accu_list[lower:], color='black', label='test accuracy', marker='o')
 plt.plot(train_accu_list[lower:], color='red', label='train accuracy', marker='>')
 plt.show()
 
-train_filename = save_path/f'./TEST/100/train_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
-test_filename = save_path/f'./TEST/100/test_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
+train_filename = save_path/f'train_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
+# test_filename = save_path/f'test_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
 text_save(train_filename, train_accu_list)
-text_save(test_filename, test_accu_list)
+# text_save(test_filename, test_accu_list)

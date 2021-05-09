@@ -474,8 +474,9 @@ for epoch in range(epoch_num):
     current_epoch += 1
     print('Now running epoch %d/%d' % (current_epoch, epoch_num))
     for i in range(int(train_num / batch_size)):
-        if i % 100 == 99:
-            print('running batch {}/{}'.format(i + 1, train_num / batch_size))
+        # if i % 100 == 99:
+        #     print('running batch {}/{}'.format(i + 1, train_num / batch_size))
+        print(f'running batch {i + 1}/{int(train_num / batch_size)}')
         grad_tmp = train_batch(i, parameters)
         parameters = combine_parameters(parameters, grad_tmp, learn_rate)
     if current_epoch == 10:
