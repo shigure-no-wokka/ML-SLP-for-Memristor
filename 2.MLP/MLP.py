@@ -345,13 +345,14 @@ def grad_parameters(img, lab, parameters):
     diff = onehot[lab] - l2_out
 
     act1 = np.dot(differential[activation[2]](l2_in), diff)
-    act2 = differential[activation[1]](l1_in) * parameters[2]['w'] * act1
+    act2 = differential[activation[1]](l1_in) * np.dot(parameters[2]['w'], act1)
 
     grad_b2 = -2 * act1
     grad_w2 = -2 * np.outer(l1_out, act1)
-    grad_b1 = -2 * differential[activation[1]](l1_in) * parameters[2]['w'] * act1
+    grad_b1 = -2 * act2
     grad_w1 = -2 * np.outer(l0_out, act2)
-    grad_b0 = -2 * differential[activation[0]](l0_in) * parameters[1]['w'] * differential[activation[1]](l1_in) * parameters[2]['w'] * act1
+    grad_b0 = -2 * differential[activation[0]](l0_in) * np.dot(parameters[1]['w'], differential[activation[1]](l1_in)
+                                                               * np.dot(parameters[2]['w'], act1))
 
     return {'w2': grad_w2, 'b2': grad_b2, 'w1': grad_w1, 'b1':grad_b1, 'b0':grad_b0}
 
@@ -447,10 +448,10 @@ def combine_parameters(parameters, grad, learn_rate):
     parameter_tmp[0]['b'] -= learn_rate * grad['b0']
     parameter_tmp[1]['b'] -= learn_rate * grad['b1']
     parameter_tmp[1]['w'] -= learn_rate * grad['w1']
-    parameter_tmp[1]['w'] = each_change(parameter_tmp[1]['w'], grad['w1'])
+    # parameter_tmp[1]['w'] = each_change(parameter_tmp[1]['w'], grad['w1'])
     parameter_tmp[2]['b'] -= learn_rate * grad['b2']
     parameter_tmp[2]['w'] -= learn_rate * grad['w2']
-    parameter_tmp[2]['w'] = each_change(parameter_tmp[2]['w'], grad['w1'])
+    # parameter_tmp[2]['w'] = each_change(parameter_tmp[2]['w'], grad['w1'])
     return parameter_tmp
 
 
@@ -479,6 +480,7 @@ train_accu_list = []
 # 进度条
 # from tqdm import tqdm_notebook
 
+save_path = Path('./Recognition data/TEST/')
 learn_rate = 0.01
 epoch_num = 10
 for epoch in range(epoch_num):
@@ -491,12 +493,13 @@ for epoch in range(epoch_num):
         parameters = combine_parameters(parameters, grad_tmp, learn_rate)
     if current_epoch == 10:
         dist_of_num = count_num(parameters)
-        text_save('./TEST/100/epoch=%d' % current_epoch, dist_of_num)
+        text_save(save_path/f'epoch={current_epoch}', dist_of_num)
 
     # train_loss_list.append(train_loss(parameters))
     train_accu_list.append(train_accuracy(parameters))
     # test_loss_list.append(test_loss(parameters))
     # test_accu_list.append(test_accuracy(parameters))
+    print(train_accu_list[-1])
 
 lower = 0
 # plt.plot(test_loss_list[lower:], color='black', label='test loss', marker='o')
@@ -506,7 +509,7 @@ lower = 0
 plt.plot(train_accu_list[lower:], color='red', label='train accuracy', marker='>')
 plt.show()
 
-train_filename = './TEST/100/train_accu epoch=%d batch=%d learn_rate=%0.2e.txt' % (epoch_num, batch_size, learn_rate)
-test_filename = './TEST/100/test_accu epoch=%d batch=%d learn_rate=%0.2e.txt' % (epoch_num, batch_size, learn_rate)
+train_filename = save_path/f'./TEST/100/train_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
+# test_filename = './TEST/100/test_accu epoch=%d batch=%d learn_rate=%0.2e.txt' % (epoch_num, batch_size, learn_rate)
 text_save(train_filename, train_accu_list)
 # text_save(test_filename, test_accu_list)
