@@ -227,7 +227,7 @@ def softmax(x):
     exp = np.exp(x-x.max())
     return exp/exp.sum()
 
-dimensions = [784, 10,10] # 输入层 784, 隐藏层 400, 输出层 10
+dimensions = [784, 50, 10] # 输入层 784, 隐藏层 , 输出层 10
 activation = [tanh, tanh, softmax]
 distribution = [
     {'b':[0,0]},
@@ -482,15 +482,19 @@ test_accu_list = []
 # from tqdm import tqdm_notebook
 
 save_path = Path('./Recognition data/TEST/')
-learn_rate = 0.01
+learn_rate = 0.1
 epoch_num = 200
 for epoch in range(epoch_num):
     current_epoch += 1
     print('Now running epoch %d/%d' % (current_epoch, epoch_num))
     for i in range(int(train_num / batch_size)):
+
+        # 速度快就用这个
         # if i % 100 == 99:
-        #     print('running batch {}/{}'.format(i + 1, train_num / batch_size))
+        #     print('epoch {} running batch {}/{}'.format(current_epoch, i + 1, train_num / batch_size))
+        # 速度慢就用这个
         print(f'epoch {current_epoch} running batch {i+1}/{int(train_num / batch_size)}')
+
         grad_tmp = train_batch(i, parameters)
         parameters = combine_parameters(parameters, grad_tmp, learn_rate, current_epoch)
     if current_epoch % 10 == 0:
@@ -501,7 +505,16 @@ for epoch in range(epoch_num):
     train_accu_list.append(train_accuracy(parameters))
     # test_loss_list.append(test_loss(parameters))
     # test_accu_list.append(test_accuracy(parameters))
-    print(train_accu_list[-1])
+    if current_epoch == 1:
+        print(f'recongnition rate {train_accu_list[epoch]}')
+        continue
+    else:
+        print(f'recognition rate {train_accu_list[epoch]} +{train_accu_list[epoch]-train_accu_list[epoch-1]} '
+              f'{(train_accu_list[epoch]-train_accu_list[0])/current_epoch}')
+
+    # if train_accu_list[epoch] > 0.7:
+    #     train_filename = save_path / f'train_accu epoch={epoch} batch={batch_size} learn_rate={learn_rate}.txt'
+    #     text_save(train_filename, train_accu_list)
 
 lower = 0
 # plt.plot(test_loss_list[lower:], color='black', label='test loss', marker='o')
