@@ -442,7 +442,7 @@ def each_change(matrix_old, gradw1):
     return matrix_new
 
 
-def combine_parameters(parameters, grad, learn_rate, current_epoch):
+def combine_parameters(parameters, grad, learn_rate):
     parameter_tmp = copy.deepcopy(parameters)
     parameter_tmp[0]['b'] -= learn_rate * grad['b0']
     parameter_tmp[1]['b'] -= learn_rate * grad['b1']
@@ -483,7 +483,7 @@ test_accu_list = []
 
 save_path = Path('./Recognition data/TEST/')
 learn_rate = 0.1
-epoch_num = 200
+epoch_num = 100
 for epoch in range(epoch_num):
     current_epoch += 1
     print('Now running epoch %d/%d' % (current_epoch, epoch_num))
@@ -496,7 +496,7 @@ for epoch in range(epoch_num):
         print(f'epoch {current_epoch} running batch {i+1}/{int(train_num / batch_size)}')
 
         grad_tmp = train_batch(i, parameters)
-        parameters = combine_parameters(parameters, grad_tmp, learn_rate, current_epoch)
+        parameters = combine_parameters(parameters, grad_tmp, learn_rate)
     if current_epoch % 10 == 0:
         dist_of_num = count_num(parameters)
         text_save(f'./Recognition data/TEST/each_num_accu epoch={current_epoch}.txt', dist_of_num)
