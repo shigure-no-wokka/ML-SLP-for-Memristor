@@ -280,6 +280,8 @@ train_num = 60000   # 训练集
 valid_num = 0   # 验证集
 test_num = 10000    # 测试集
 
+
+# 将训练集与测试集合并应该就可以从这里设置
 with open(train_img_path, 'rb') as f:
     struct.unpack('>4i', f.read(16))
     tmp_img = np.fromfile(f, dtype=np.uint8).reshape(-1, 28*28)/255
@@ -331,6 +333,7 @@ def sqr_loss(img, lab, parameters):
     y = onehot[lab]
     diff = y - y_pred
     return np.dot(diff, diff)
+
 differential = {softmax:d_softmax, tanh:d_tanh}
 
 def grad_parameters(img, lab, parameters):
@@ -500,6 +503,9 @@ for epoch in range(epoch_num):
     if current_epoch % 10 == 0:
         dist_of_num = count_num(parameters)
         text_save(f'./Recognition data/TEST/each_num_accu epoch={current_epoch}.txt', dist_of_num)
+        train_filename = save_path / f'train_accu epoch={current_epoch} batch={batch_size} ' \
+                                     f'learn_rate={learn_rate}.txt'
+        text_save(train_filename, train_accu_list)
 
     # train_loss_list.append(train_loss(parameters))
     train_accu_list.append(train_accuracy(parameters))
@@ -509,22 +515,16 @@ for epoch in range(epoch_num):
         print(f'recongnition rate {train_accu_list[epoch]}')
         continue
     else:
-        print(f'recognition rate {train_accu_list[epoch]} +{train_accu_list[epoch]-train_accu_list[epoch-1]} '
-              f'{(train_accu_list[epoch]-train_accu_list[0])/current_epoch}')
+        print(f'recognition rate {train_accu_list[epoch]} +{train_accu_list[epoch]-train_accu_list[epoch-1]}'
+              f' {(train_accu_list[epoch]-train_accu_list[0])/current_epoch}')
 
     # if train_accu_list[epoch] > 0.7:
     #     train_filename = save_path / f'train_accu epoch={epoch} batch={batch_size} learn_rate={learn_rate}.txt'
     #     text_save(train_filename, train_accu_list)
 
 lower = 0
-# plt.plot(test_loss_list[lower:], color='black', label='test loss', marker='o')
-# plt.plot(train_loss_list[lower:], color='red', label='train loss', marker='>')
-# plt.show()
-# plt.plot(test_accu_list[lower:], color='black', label='test accuracy', marker='o')
 plt.plot(train_accu_list[lower:], color='red', label='train accuracy', marker='>')
 plt.show()
 
 train_filename = save_path/f'train_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
-# test_filename = save_path/f'test_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
 text_save(train_filename, train_accu_list)
-# text_save(test_filename, test_accu_list)
