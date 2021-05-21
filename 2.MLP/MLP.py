@@ -227,7 +227,7 @@ def softmax(x):
     exp = np.exp(x-x.max())
     return exp/exp.sum()
 
-dimensions = [784, 50, 10] # 输入层 784, 隐藏层 , 输出层 10
+dimensions = [784, 100, 10] # 输入层 784, 隐藏层 , 输出层 10
 activation = [tanh, tanh, softmax]
 distribution = [
     {'b':[0,0]},
@@ -401,7 +401,7 @@ def test_accuracy(parameters):
 # print(valid_loss(parameters))
 # print(valid_accuracy(init_parameters()))
 
-batch_size = 100
+batch_size = 5000
 
 
 def train_batch(current_batch, parameters):
@@ -482,8 +482,8 @@ test_accu_list = []
 # from tqdm import tqdm_notebook
 
 save_path = Path('./Recognition data/TEST/')
-learn_rate = 0.1
-epoch_num = 100
+learn_rate = 0.675
+epoch_num = 200
 for epoch in range(epoch_num):
     current_epoch += 1
     print('Now running epoch %d/%d' % (current_epoch, epoch_num))
@@ -497,20 +497,19 @@ for epoch in range(epoch_num):
 
         grad_tmp = train_batch(i, parameters)
         parameters = combine_parameters(parameters, grad_tmp, learn_rate)
-    if current_epoch % 10 == 0:
-        dist_of_num = count_num(parameters)
-        text_save(f'./Recognition data/TEST/each_num_accu epoch={current_epoch}.txt', dist_of_num)
 
-    # train_loss_list.append(train_loss(parameters))
+    # 各数字识别率可视化矩阵
+    # if current_epoch % 10 == 0:
+    #     dist_of_num = count_num(parameters)
+    #     text_save(f'./Recognition data/TEST/each_num_accu epoch={current_epoch}.txt', dist_of_num)
+
+    train_loss_list.append(train_loss(parameters))
     train_accu_list.append(train_accuracy(parameters))
     # test_loss_list.append(test_loss(parameters))
     # test_accu_list.append(test_accuracy(parameters))
-    if current_epoch == 1:
-        print(f'recongnition rate {train_accu_list[epoch]}')
-        continue
-    else:
-        print(f'recognition rate {train_accu_list[epoch]} +{train_accu_list[epoch]-train_accu_list[epoch-1]} '
-              f'{(train_accu_list[epoch]-train_accu_list[0])/current_epoch}')
+
+    print(f'recongnition rate {train_accu_list[epoch]} loss {train_loss_list[epoch]}')
+
 
     # if train_accu_list[epoch] > 0.7:
     #     train_filename = save_path / f'train_accu epoch={epoch} batch={batch_size} learn_rate={learn_rate}.txt'
@@ -518,8 +517,8 @@ for epoch in range(epoch_num):
 
 lower = 0
 # plt.plot(test_loss_list[lower:], color='black', label='test loss', marker='o')
-# plt.plot(train_loss_list[lower:], color='red', label='train loss', marker='>')
-# plt.show()
+plt.plot(train_loss_list[lower:], color='red', label='train loss', marker='>')
+plt.show()
 # plt.plot(test_accu_list[lower:], color='black', label='test accuracy', marker='o')
 plt.plot(train_accu_list[lower:], color='red', label='train accuracy', marker='>')
 plt.show()

@@ -57,13 +57,6 @@ def delt_GD(xD, aD, bD):
     yD = xD - aD * np.exp(-bD * ((GDmax - xD) / (GDmax - GDmin)))
     return yD
 
-# 这部分忘了，好像是根据某篇文章中，利用两个电导之差作为权重的说法，自己推导的公式，现在弃用
-def delt_P(xP, aP, bP):
-    dP = aP * np.exp(-bP * ((xP - GPmin) / (GPmax - GPmin))) - aP * np.exp(-bP * ((GPmax - xP) / (GPmax - GPmin)))
-    return dP
-def delt_D(xD, aD, bD):
-    dD = aD * np.exp(-bD * ((GDmax - xD) / (GDmax - GDmin))) - aD * np.exp(-bD * ((xD - GDmin) / (GDmax - GDmin)))
-    return dD
 
 def curve_fit_GP(P, xP, yP, save_path='./Fit_curve/GP%d.png'):
     # yP 段拟合数据
