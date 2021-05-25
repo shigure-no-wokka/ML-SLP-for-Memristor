@@ -34,6 +34,7 @@ def draw_graph_minus(weight):
     plt.plot(weight, color='black', label='weight_plus_list', marker='o')
     return 0
 
+
 if __name__ == '__main__':
 
 
