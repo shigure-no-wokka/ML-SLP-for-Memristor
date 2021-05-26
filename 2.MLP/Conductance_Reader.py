@@ -1,7 +1,5 @@
 import numpy as np
 
-dimensions = [28*28, 10]
-onehot = np.identity(dimensions[-1])
 GP = np.array([0.99,
 3.7,
 6.1,
@@ -208,28 +206,5 @@ GPmin = min(GP)
 GDmax = max(GD)
 GDmin = min(GD)
 
-distribution = [
-    {'b':[0, 1]},
-    {'g+':[0, GPmax], 'g-':[0,GPmax]},
-]
-
-# 初始化参数
-def init_parameters_g_plus():
-    dist = distribution[1]['g+']
-    return np.random.rand(dimensions[0], dimensions[1]) * (dist[1] - dist[0]) + dist[0]
-
-
-print(onehot)
-
-print(onehot[0])
-
-
-parameters = init_parameters_g_plus()
-print(parameters)
-
-print(parameters[:, 1])
-
-# grad_g_plus = np.random.rand(dimensions[0], dimensions[1]) * 0
-# grad_g_minus = np.random.rand(dimensions[0], dimensions[1]) * 0
-#
-# print(grad_g_minus)
+GP_new = np.array([(each - GPmin) / (GPmax - GPmin) for each in GP])
+GD_new = np.array([(each - GDmin) / (GDmax - GDmin) for each in GD])
