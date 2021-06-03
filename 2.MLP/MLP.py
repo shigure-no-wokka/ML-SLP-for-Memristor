@@ -267,7 +267,7 @@ def predict(img, parameters):
     l2_out = activation[2](l2_in)
     return l2_out
 # print(predict(np.random.rand(784), parameters).argmax())
-dataset_path = Path('./MNIST')
+dataset_path = Path('../MNIST')
 train_img_path = dataset_path/'train-images-idx3-ubyte'
 train_lab_path = dataset_path/'train-labels-idx1-ubyte'
 test_img_path = dataset_path/'t10k-images-idx3-ubyte'

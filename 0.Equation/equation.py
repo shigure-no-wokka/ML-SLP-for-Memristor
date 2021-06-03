@@ -8,8 +8,8 @@ import math
 #     {'wmax': 1, 'wmin':1e-4}
 # ]
 parameters = [
-    {'a+':2.61, 'b+':0.07},
-    {'a-':6.35, 'b-':1.68},
+    {'a+':1e-2, 'b+':1},
+    {'a-':1e-2, 'b-':1},
     {'wmax': 1, 'wmin':1e-4}
 ]
 weight_plus_list = [parameters[2]['wmin']]
@@ -33,13 +33,16 @@ def draw_graph_plus(weight):
 def draw_graph_minus(weight):
     plt.plot(weight, color='black', label='weight_plus_list', marker='o')
     return 0
-
+def draw_graph_both(weight_plus, weight_minus):
+    weight = weight_plus + weight_minus
+    plt.plot(weight, color='blue', label='weight', marker='o')
+    return 0
 
 if __name__ == '__main__':
 
 
     count_cycle = 0
-    count_set = input('请输入需要的电导数据个数：')
+    # count_set = input('请输入需要的电导数据个数：')
 
 
     while True:
@@ -50,13 +53,20 @@ if __name__ == '__main__':
         diff = weight_minus_list[-1] - weight_plus_list[-1]
         count_cycle += 1
 
-        if count_cycle == int(count_set):
+        if weight_plus_list[-1] >= 1:
             break
+
+        # if count_cycle == int(count_set):
+        #     break
 
 
     print(weight_plus_list)
     print(weight_minus_list)
 
-    draw_graph_minus(weight_minus_list)
-    draw_graph_plus(weight_plus_list)
+    # weight_minus_list.reverse()
+    # draw_graph_minus(weight_minus_list)
+    # draw_graph_plus(weight_plus_list)
+
+    draw_graph_both(weight_plus_list, weight_minus_list)
+
     plt.show()
