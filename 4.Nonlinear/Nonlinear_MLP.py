@@ -7,14 +7,13 @@ import Nonlinear_equation as ne
 
 
 GP, GD = ne.equation()
-
 GPmax = max(GP)
 GPmin = min(GP)
 GDmax = max(GD)
 GDmin = min(GD)
 
-GP_new = np.array([each for each in GP])
-GD_new = np.array([each for each in GD])
+GP_new = np.array([(each - GPmin) / (GPmax - GPmin) for each in GP])
+GD_new = np.array([(each - GDmin) / (GDmax - GDmin) for each in GD])
 
 
 # 定义激活函数
@@ -29,20 +28,18 @@ dimensions = [784, 50, 10] # 输入层 784, 隐藏层 , 输出层 10
 activation = [tanh, tanh, softmax]
 distribution = [
     {'b':[0,0]},
-    {'b':[0,0], 'g+':[0, 1], 'g-':[0, 1]},
-    {'b':[0,0], 'g+':[0, 1], 'g-':[0, 1]},
+    {'b':[0,0], 'w':[0, 1]},
+    {'b':[0,0], 'w':[0, 1]},
 ]
 
 # 初始化参数
 def init_parameters_b(layer):
     dist = distribution[layer]['b']
     return np.random.rand(dimensions[layer])*(dist[1]-dist[0])+dist[0]
-def init_parameters_gp(layer):
-    dist = distribution[layer]['g+']
+def init_parameters_w(layer):
+    dist = distribution[layer]['w']
     return np.random.rand(dimensions[layer-1], dimensions[layer]) * (dist[1] - dist[0]) + dist[0]
-def init_parameters_gm(layer):
-    dist = distribution[layer]['g-']
-    return np.random.rand(dimensions[layer-1], dimensions[layer]) * (dist[1] - dist[0]) + dist[0]
+
 def init_parameters():
     parameter = []
     for i in range(len(distribution)):
@@ -51,11 +48,9 @@ def init_parameters():
             if j == 'b':
                 layer_parameter['b'] = init_parameters_b(i)
                 continue
-            if j == 'g+':
-                layer_parameter['g+'] = init_parameters_gp(i)
+            if j == 'w':
+                layer_parameter['w'] = init_parameters_w(i)
                 continue
-            if j == 'g-':
-                layer_parameter['g-'] = init_parameters_gm(i)
         parameter.append(layer_parameter)
     return parameter
 
@@ -65,9 +60,9 @@ def init_parameters():
 def predict(img, parameters):
     l0_in = img + parameters[0]['b']
     l0_out = activation[0](l0_in)
-    l1_in = np.dot(l0_out, parameters[1]['g+'] - parameters[1]['g-'])+parameters[1]['b']
+    l1_in = np.dot(l0_out, parameters[1]['w'])+parameters[1]['b']
     l1_out = activation[1](l1_in)
-    l2_in = np.dot(l1_out, parameters[2]['g+'] - parameters[2]['g-'])+parameters[2]['b']
+    l2_in = np.dot(l1_out, parameters[2]['w'])+parameters[2]['b']
     l2_out = activation[2](l2_in)
     return l2_out
 # print(predict(np.random.rand(784), parameters).argmax())
@@ -143,45 +138,25 @@ differential = {softmax:d_softmax, tanh:d_tanh}
 def grad_parameters(img, lab, parameters):
     l0_in = img + parameters[0]['b']
     l0_out = activation[0](l0_in)
-    l1_in = np.dot(l0_out, parameters[1]['g+'] - parameters[1]['g-']) + parameters[1]['b']
+    l1_in = np.dot(l0_out, parameters[1]['w']) + parameters[1]['b']
     l1_out = activation[1](l1_in)
-    l2_in = np.dot(l1_out, parameters[2]['g+'] - parameters[2]['g-']) + parameters[2]['b']
+    l2_in = np.dot(l1_out, parameters[2]['w']) + parameters[2]['b']
     l2_out = activation[2](l2_in)
 
     diff = onehot[lab] - l2_out
 
     act1 = np.dot(differential[activation[2]](l2_in), diff)
-    act2 = differential[activation[1]](l1_in) * np.dot(parameters[2]['g+'] - parameters[2]['g-'], act1)
+    act2 = differential[activation[1]](l1_in) * np.dot(parameters[2]['w'], act1)
 
     grad_b2 = -2 * act1
-    grad_g2p = -2 * np.outer(l1_out, act1)
-    grad_g2m = 2 * np.outer(l1_out, act1)
+    grad_w1 = -2 * np.outer(l1_out, act1)
     grad_b1 = -2 * act2
-    grad_g1p = -2 * np.outer(l0_out, act2)
-    grad_g1m = 2 * np.outer(l0_out, act2)
-    grad_b0 = -2 * differential[activation[0]](l0_in) * np.dot(parameters[1]['g+'] - parameters[1]['g-'],
-                                                               differential[activation[1]](l1_in) * np.dot(parameters[2]['g+'] - parameters[2]['g-'], act1))
+    grad_w2 = -2 * np.outer(l0_out, act2)
+    grad_b0 = -2 * differential[activation[0]](l0_in) * np.dot(parameters[1]['w'], differential[activation[1]](l1_in)
+                                                               * np.dot(parameters[2]['w'], act1))
 
-    return {'g2+': grad_g2p, 'g2-': grad_g2m, 'b2': grad_b2, 'g1+': grad_g1p, 'g1-': grad_g1m,  'b1':grad_b1,
+    return {'w2': grad_w2, 'b2': grad_b2, 'w1': grad_w1, 'b1':grad_b1,
             'b0':grad_b0}
-
-
-def count_num(parameters):
-    dist_of_num = [
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
-    ]
-    for img_i in range(train_num):
-        dist_of_num[train_lab[img_i]][predict(train_img[img_i], parameters).argmax()] += 1
-    return dist_of_num
 
 
 def train_loss(parameters):
@@ -211,7 +186,7 @@ def test_accuracy(parameters):
 # print(valid_loss(parameters))
 # print(valid_accuracy(init_parameters()))
 
-batch_size = 5000
+batch_size = 60000
 
 def train_batch(current_batch, parameters):
     grad_accu = grad_parameters(train_img[current_batch * batch_size + 0], train_lab[current_batch * batch_size + 0],
@@ -224,7 +199,6 @@ def train_batch(current_batch, parameters):
     for key in grad_accu.keys():
         grad_accu[key] /= batch_size
     return grad_accu
-
 
 # print(train_batch(0, init_parameters()))
 
@@ -257,17 +231,13 @@ def combine_parameters(parameters, grad, learn_rate):
     parameter_tmp[0]['b'] -= learn_rate * grad['b0']
 
     parameter_tmp[1]['b'] -= learn_rate * grad['b1']
-    parameter_tmp[1]['g+'] -= learn_rate * grad['g1+']
-    parameter_tmp[1]['g-'] -= learn_rate * grad['g1-']
+    parameter_tmp[1]['w'] -= learn_rate * grad['w1']
 
     parameter_tmp[2]['b'] -= learn_rate * grad['b2']
-    parameter_tmp[2]['g+'] -= learn_rate * grad['g2+']
-    parameter_tmp[2]['g-'] -= learn_rate * grad['g2-']
+    parameter_tmp[2]['w'] -= learn_rate * grad['w2']
 
-    parameter_tmp[1]['g+'] = each_change(parameter_tmp[1]['g+'], grad['g1+'])
-    parameter_tmp[1]['g-'] = each_change(parameter_tmp[1]['g-'], grad['g1-'])
-    parameter_tmp[2]['g+'] = each_change(parameter_tmp[2]['g+'], grad['g2+'])
-    parameter_tmp[2]['g-'] = each_change(parameter_tmp[2]['g-'], grad['g2-'])
+    parameter_tmp[1]['w'] = each_change(parameter_tmp[1]['w'], grad['w1'])
+    parameter_tmp[2]['w'] = each_change(parameter_tmp[2]['w'], grad['w2'])
 
     return parameter_tmp
 
@@ -297,7 +267,7 @@ test_accu_list = []
 
 save_path = Path('./RecognitionData/')
 learn_rate = 0.65
-epoch_num = 100
+epoch_num = 50
 for epoch in range(epoch_num):
     current_epoch += 1
     print('Now running epoch %d/%d' % (current_epoch, epoch_num))
@@ -311,15 +281,6 @@ for epoch in range(epoch_num):
 
         grad_tmp = train_batch(i, parameters)
         parameters = combine_parameters(parameters, grad_tmp, learn_rate)
-
-    # # 各数字识别率可视化矩阵D
-    # if current_epoch % 10 == 0:
-    #     dist_of_num = count_num(parameters)
-    #     text_save(f'./RecognitionData/epoch={epoch_num} '
-    #               f'batch_size={batch_size} '
-    #               f'learn_rate={learn_rate} '
-    #               f'each_num_accu epoch={current_epoch}.txt',
-    #               dist_of_num)
 
     train_loss_list.append(train_loss(parameters))
     train_accu_list.append(train_accuracy(parameters))
