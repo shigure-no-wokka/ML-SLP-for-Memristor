@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 file_name_num = []
-for each in os.listdir('./电导数据/')[1:]:
+for each in os.listdir('电导数据/')[1:]:
     file_name_num.append("".join(list(filter(str.isdigit, each))))
 
 def read_G(file_len):
