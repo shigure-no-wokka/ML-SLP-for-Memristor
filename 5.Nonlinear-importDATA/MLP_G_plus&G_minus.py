@@ -5,8 +5,17 @@ import matplotlib.pyplot as plt
 import copy
 
 
-GP = np.array([])
-GD = np.array([])
+# G = np.loadtxt('Copoly.txt')
+# G_1 = G[:,0]
+# G_2 = G[:,1]
+# G_3 = G[:,2]
+#
+# GP = G_3[:20]
+# GD = G_3[20:]
+
+GP = abs(np.loadtxt('zyw-syn3-GP.txt'))
+GD = abs(np.loadtxt('zyw-syn3-GD.txt'))
+
 GPmax = max(GP)
 GPmin = min(GP)
 GDmax = max(GD)
@@ -165,22 +174,11 @@ def grad_parameters(img, lab, parameters):
             'b0':grad_b0}
 
 
-def count_num(parameters):
-    dist_of_num = [
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
-    ]
-    for img_i in range(train_num):
-        dist_of_num[train_lab[img_i]][predict(train_img[img_i], parameters).argmax()] += 1
-    return dist_of_num
+# def count_num(parameters):
+#     matrix_of_num = np.zeros((10, 10))
+#     for img_i in range(train_num):
+#         matrix_of_num[train_lab[img_i]][predict(train_img[img_i], parameters).argmax()] += 1
+#     return matrix_of_num
 
 
 def train_loss(parameters):
@@ -273,6 +271,22 @@ def combine_parameters(parameters, grad, learn_rate):
 
 # print(combine_parameters(parameters, train_batch(0, parameters), 1))
 
+def count_num(parameters):
+    dist_of_num = [
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
+    ]
+    for img_i in range(train_num):
+        dist_of_num[train_lab[img_i]][predict(train_img[img_i], parameters).argmax()] += 1
+    return dist_of_num
 
 def text_save(filename, data):  # filename为写入CSV文件的路径，data为要写入数据列表.
     file = open(filename, 'a')
@@ -294,9 +308,9 @@ test_accu_list = []
 # print(valid_accuracy(parameters))
 
 
-save_path = Path('./Recognition data/TEST/')
-learn_rate = 0.65
-epoch_num = 200
+save_path = Path('./Recognition data/')
+learn_rate = 0.5
+epoch_num = 100
 for epoch in range(epoch_num):
     current_epoch += 1
     print('Now running epoch %d/%d' % (current_epoch, epoch_num))
@@ -314,7 +328,7 @@ for epoch in range(epoch_num):
     # 各数字识别率可视化矩阵
     if current_epoch % 10 == 0:
         dist_of_num = count_num(parameters)
-        text_save(f'./Recognition data/TEST/epoch={epoch_num} '
+        text_save(f'./Recognition data/zyw3 epoch={epoch_num} '
                   f'batch_size={batch_size} '
                   f'learn_rate={learn_rate} '
                   f'each_num_accu epoch={current_epoch}.txt',
@@ -340,7 +354,7 @@ plt.show()
 plt.plot(train_accu_list[lower:], color='red', label='train accuracy', marker='>')
 plt.show()
 
-train_filename = save_path/f'train_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
+train_filename = save_path/f'zyw3 train_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
 # test_filename = save_path/f'test_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
 text_save(train_filename, train_accu_list)
 # text_save(test_filename, test_accu_list)

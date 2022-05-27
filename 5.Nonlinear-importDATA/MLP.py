@@ -4,18 +4,6 @@ import struct
 import matplotlib.pyplot as plt
 import copy
 
-
-GP = np.array([])
-GD = np.array([])
-GPmax = max(GP)
-GPmin = min(GP)
-GDmax = max(GD)
-GDmin = min(GD)
-
-GP_new = np.array([(each - GPmin) / (GPmax - GPmin) for each in GP])
-GD_new = np.array([(each - GDmin) / (GDmax - GDmin) for each in GD])
-
-
 # 定义激活函数
 def tanh(x):
     return np.tanh(x)
@@ -165,22 +153,11 @@ def grad_parameters(img, lab, parameters):
             'b0':grad_b0}
 
 
-def count_num(parameters):
-    dist_of_num = [
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
-    ]
-    for img_i in range(train_num):
-        dist_of_num[train_lab[img_i]][predict(train_img[img_i], parameters).argmax()] += 1
-    return dist_of_num
+# def count_num(parameters):
+#     matrix_of_num = np.zeros((10, 10))
+#     for img_i in range(train_num):
+#         matrix_of_num[train_lab[img_i]][predict(train_img[img_i], parameters).argmax()] += 1
+#     return matrix_of_num
 
 
 def train_loss(parameters):
@@ -227,28 +204,6 @@ def train_batch(current_batch, parameters):
 
 # print(train_batch(0, init_parameters()))
 
-def findGP_num(data, find_array=GP_new):
-    data_array = np.array([data] * len(find_array))
-    diff = abs(data_array - find_array)
-    return find_array[np.where(diff == np.min(diff))]
-
-
-def findGD_num(data, find_array=GD_new):
-    data_array = np.array([data] * len(find_array))
-    diff = abs(data_array - find_array)
-    return find_array[np.where(diff == np.min(diff))]
-
-
-def each_change(matrix_old, gradw1):
-    matrix_new = np.zeros(matrix_old.shape)
-    for i in range(matrix_old.shape[0]):
-        for j in range(matrix_old.shape[1]):
-            if gradw1[i][j] < 0:
-                matrix_new[i][j] = findGP_num(matrix_old[i][j])
-            else:
-                matrix_new[i][j] = findGD_num(matrix_old[i][j])
-    return matrix_new
-
 
 def combine_parameters(parameters, grad, learn_rate):
     parameter_tmp = copy.deepcopy(parameters)
@@ -263,16 +218,27 @@ def combine_parameters(parameters, grad, learn_rate):
     parameter_tmp[2]['g+'] -= learn_rate * grad['g2+']
     parameter_tmp[2]['g-'] -= learn_rate * grad['g2-']
 
-    parameter_tmp[1]['g+'] = each_change(parameter_tmp[1]['g+'], grad['g1+'])
-    parameter_tmp[1]['g-'] = each_change(parameter_tmp[1]['g-'], grad['g1-'])
-    parameter_tmp[2]['g+'] = each_change(parameter_tmp[2]['g+'], grad['g2+'])
-    parameter_tmp[2]['g-'] = each_change(parameter_tmp[2]['g-'], grad['g2-'])
-
     return parameter_tmp
 
 
 # print(combine_parameters(parameters, train_batch(0, parameters), 1))
 
+def count_num(parameters):
+    dist_of_num = [
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
+    ]
+    for img_i in range(train_num):
+        dist_of_num[train_lab[img_i]][predict(train_img[img_i], parameters).argmax()] += 1
+    return dist_of_num
 
 def text_save(filename, data):  # filename为写入CSV文件的路径，data为要写入数据列表.
     file = open(filename, 'a')
@@ -295,8 +261,8 @@ test_accu_list = []
 
 
 save_path = Path('./Recognition data/TEST/')
-learn_rate = 0.65
-epoch_num = 200
+learn_rate = 0.5
+epoch_num = 100
 for epoch in range(epoch_num):
     current_epoch += 1
     print('Now running epoch %d/%d' % (current_epoch, epoch_num))
@@ -340,7 +306,7 @@ plt.show()
 plt.plot(train_accu_list[lower:], color='red', label='train accuracy', marker='>')
 plt.show()
 
-train_filename = save_path/f'train_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
-# test_filename = save_path/f'test_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
-text_save(train_filename, train_accu_list)
-# text_save(test_filename, test_accu_list)
+train_accu_filename = save_path/f'train_accu epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
+train_loss_filename = save_path/f'train_loss epoch={epoch_num} batch={batch_size} learn_rate={learn_rate}.txt'
+text_save(train_accu_filename, train_accu_list)
+text_save(train_loss_filename, train_loss_list)
