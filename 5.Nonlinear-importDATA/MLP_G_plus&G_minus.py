@@ -5,16 +5,8 @@ import matplotlib.pyplot as plt
 import copy
 
 
-# G = np.loadtxt('Copoly.txt')
-# G_1 = G[:,0]
-# G_2 = G[:,1]
-# G_3 = G[:,2]
-#
-# GP = G_3[:20]
-# GD = G_3[20:]
-
-GP = abs(np.loadtxt('zyw-syn3-GP.txt'))
-GD = abs(np.loadtxt('zyw-syn3-GD.txt'))
+GP = abs(np.loadtxt('qxs-GP.txt'))
+GD = abs(np.loadtxt('qxs-GD.txt'))
 
 GPmax = max(GP)
 GPmin = min(GP)
@@ -228,13 +220,13 @@ def train_batch(current_batch, parameters):
 def findGP_num(data, find_array=GP_new):
     data_array = np.array([data] * len(find_array))
     diff = abs(data_array - find_array)
-    return find_array[np.where(diff == np.min(diff))]
+    return find_array[np.where(diff == np.min(diff))][0]
 
 
 def findGD_num(data, find_array=GD_new):
     data_array = np.array([data] * len(find_array))
     diff = abs(data_array - find_array)
-    return find_array[np.where(diff == np.min(diff))]
+    return find_array[np.where(diff == np.min(diff))][0]
 
 
 def each_change(matrix_old, gradw1):

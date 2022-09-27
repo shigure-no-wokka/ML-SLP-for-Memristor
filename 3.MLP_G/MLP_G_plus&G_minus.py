@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import copy
 
 
-GP = np.array([])
-GD = np.array([])
+GP = np.array([np.loadtxt('ryx-GP.txt')])
+GD = np.array([np.loadtxt('ryx-GD.txt')])
 GPmax = max(GP)
 GPmin = min(GP)
 GDmax = max(GD)
