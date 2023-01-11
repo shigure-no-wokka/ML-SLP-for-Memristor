@@ -402,8 +402,6 @@ def test_accuracy(parameters):
 # print(valid_accuracy(init_parameters()))
 
 batch_size = 5000
-
-
 def train_batch(current_batch, parameters):
     grad_accu = grad_parameters(train_img[current_batch * batch_size + 0], train_lab[current_batch * batch_size + 0],
                                 parameters)
