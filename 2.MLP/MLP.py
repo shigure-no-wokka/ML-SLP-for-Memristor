@@ -449,8 +449,8 @@ def combine_parameters(parameters, grad, learn_rate):
     parameter_tmp[2]['b'] -= learn_rate * grad['b2']
     parameter_tmp[2]['w'] -= learn_rate * grad['w2']
 
-    parameter_tmp[1]['w'] = each_change(parameter_tmp[1]['w'], grad['w1'])
-    parameter_tmp[2]['w'] = each_change(parameter_tmp[2]['w'], grad['w2'])
+    # parameter_tmp[1]['w'] = each_change(parameter_tmp[1]['w'], grad['w1'])
+    # parameter_tmp[2]['w'] = each_change(parameter_tmp[2]['w'], grad['w2'])
     return parameter_tmp
 
 
